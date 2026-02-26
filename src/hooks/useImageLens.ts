@@ -2,6 +2,7 @@ import { RefObject, useCallback, useEffect, useRef, useState } from 'react'
 import type { MouseEvent } from 'react'
 import { IMAGE_CONFIG } from '../config/imageConfig'
 import { clamp, formatRgba, toHex } from '../utils/format'
+import { useLensKeyboardMove } from './useLensKeyboardMove'
 import { useRafThrottle } from './useRafThrottle'
 import type { LoadedImage } from './useImageLoader'
 
@@ -31,13 +32,14 @@ export const useImageLens = ({ image, imgRef, containerRef }: LensOptions) => {
   const sourceCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const sourceCtxRef = useRef<CanvasRenderingContext2D | null>(null)
   const isReadyRef = useRef(false)
+  const lastImgRef = useRef<{ x: number; y: number } | null>(null)
   const [state, setState] = useState<LensState>({ visible: false, x: 0, y: 0 })
-
   useEffect(() => {
     setState((prev) => ({ ...prev, visible: false }))
     isReadyRef.current = false
     sourceCanvasRef.current = null
     sourceCtxRef.current = null
+    lastImgRef.current = null
 
     if (!image) return
 
@@ -60,7 +62,6 @@ export const useImageLens = ({ image, imgRef, containerRef }: LensOptions) => {
     }
     img.src = image.src
   }, [image])
-
   const drawLens = useCallback((imgX: number, imgY: number) => {
     const lensCanvas = lensCanvasRef.current
     const sourceCanvas = sourceCanvasRef.current
@@ -103,7 +104,6 @@ export const useImageLens = ({ image, imgRef, containerRef }: LensOptions) => {
     lensCtx.lineTo(lensSize, lensSize / 2)
     lensCtx.stroke()
   }, [])
-
   const update = useCallback(
     (clientX: number, clientY: number) => {
       if (!image || !imgRef.current || !containerRef.current || !isReadyRef.current) {
@@ -127,6 +127,7 @@ export const useImageLens = ({ image, imgRef, containerRef }: LensOptions) => {
       const scaleY = image.height / imgRect.height
       const imgX = clamp(Math.floor(relX * scaleX), 0, image.width - 1)
       const imgY = clamp(Math.floor(relY * scaleY), 0, image.height - 1)
+      lastImgRef.current = { x: imgX, y: imgY }
 
       const sourceCtx = sourceCtxRef.current
       if (!sourceCtx) return
@@ -165,17 +166,28 @@ export const useImageLens = ({ image, imgRef, containerRef }: LensOptions) => {
     },
     [containerRef, drawLens, image, imgRef]
   )
-
-  const throttledUpdate = useRafThrottle(update)
-
-  const onPointerMove = useCallback(
-    (event: MouseEvent<HTMLElement>) => {
-      throttledUpdate(event.clientX, event.clientY)
+  const moveBy = useCallback(
+    (dx: number, dy: number) => {
+      if (!image || !imgRef.current || !lastImgRef.current) return
+      const nextX = clamp(lastImgRef.current.x + dx, 0, image.width - 1)
+      const nextY = clamp(lastImgRef.current.y + dy, 0, image.height - 1)
+      const imgRect = imgRef.current.getBoundingClientRect()
+      const scaleX = image.width / imgRect.width
+      const scaleY = image.height / imgRect.height
+      const clientX = imgRect.left + (nextX + 0.5) / scaleX
+      const clientY = imgRect.top + (nextY + 0.5) / scaleY
+      update(clientX, clientY)
     },
+    [image, imgRef, update]
+  )
+  const throttledUpdate = useRafThrottle(update)
+  useLensKeyboardMove(state.visible, moveBy)
+  const onPointerMove = useCallback(
+    (event: MouseEvent<HTMLElement>) => throttledUpdate(event.clientX, event.clientY),
     [throttledUpdate]
   )
-
   const onPointerLeave = useCallback(() => {
+    lastImgRef.current = null
     setState((prev) => ({ ...prev, visible: false }))
   }, [])
 

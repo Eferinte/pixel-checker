@@ -37,6 +37,7 @@ const App = () => {
                 <p className="font-semibold text-slate-900">使用提示</p>
                 <div className="mt-3 flex flex-col gap-2">
                   <span>- 鼠标悬停在图片上可查看放大镜和像素 RGBA 信息。</span>
+                  <span>- 放大镜出现时可用 WASD 或方向键逐像素移动，按住可快速移动。</span>
                   <span>- 大尺寸图片会自动缩放到性能友好的尺寸。</span>
                   <span>- 清空图片后可重新上传新的素材进行对比。</span>
                 </div>

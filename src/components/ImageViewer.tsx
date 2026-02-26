@@ -35,7 +35,7 @@ export const ImageViewer = ({ image, onClear }: ImageViewerProps) => {
 
       <div
         ref={containerRef}
-        className="checkerboard-surface relative mt-5 flex w-full justify-center overflow-hidden rounded-xl border border-slate-200 p-4"
+        className="checkerboard-surface relative mt-5 flex w-full justify-center overflow-hidden border border-slate-200 p-4"
       >
         <img
           ref={imgRef}
