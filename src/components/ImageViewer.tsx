@@ -35,13 +35,13 @@ export const ImageViewer = ({ image, onClear }: ImageViewerProps) => {
 
       <div
         ref={containerRef}
-        className="relative mt-5 flex w-full justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50/70 p-4"
+        className="checkerboard-surface relative mt-5 flex w-full justify-center overflow-hidden rounded-xl border border-slate-200 p-4"
       >
         <img
           ref={imgRef}
           src={image.src}
           alt={image.fileName}
-          className="max-h-[70vh] max-w-full select-none rounded-lg"
+          className="max-h-[70vh] max-w-full select-none"
           onMouseMove={onPointerMove}
           onMouseLeave={onPointerLeave}
           draggable={false}
@@ -56,7 +56,7 @@ export const ImageViewer = ({ image, onClear }: ImageViewerProps) => {
               ref={lensCanvasRef}
               width={IMAGE_CONFIG.LENS_SIZE}
               height={IMAGE_CONFIG.LENS_SIZE}
-              className="lens-surface rounded-lg border border-slate-900/10 bg-white shadow-glow"
+              className="checkerboard-surface lens-surface rounded-lg border border-slate-900/10 shadow-glow"
             />
             <div className="rounded-md border border-slate-200 bg-white/90 px-2 py-1 text-xs text-slate-700 shadow">
               <div className="flex items-center justify-between">
