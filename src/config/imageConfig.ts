@@ -1,0 +1,12 @@
+export const IMAGE_CONFIG = {
+  MAX_FILE_SIZE_MB: 10,
+  MAX_FILE_SIZE_BYTES: 100 * 1024 * 1024,
+  MAX_IMAGE_DIMENSION: 10000,
+  SUPPORTED_TYPES: ['image/png', 'image/jpeg', 'image/webp'],
+  LENS_SIZE: 180,
+  LENS_ZOOM: 8,
+  LENS_OFFSET: 16,
+  LENS_INFO_HEIGHT: 36,
+}
+
+export const ACCEPTED_TYPES = IMAGE_CONFIG.SUPPORTED_TYPES.join(',')
