@@ -71,14 +71,27 @@ export const useImageLens = ({ image, imgRef, containerRef }: LensOptions) => {
     const maxSourceSize = Math.min(sourceCanvas.width, sourceCanvas.height)
     const sourceSize = Math.max(2, Math.min(maxSourceSize, Math.round(lensSize / zoom)))
     const half = Math.floor(sourceSize / 2)
-    const sx = clamp(imgX - half, 0, sourceCanvas.width - sourceSize)
-    const sy = clamp(imgY - half, 0, sourceCanvas.height - sourceSize)
+    const desiredX = imgX - half
+    const desiredY = imgY - half
+    const sx = clamp(desiredX, 0, sourceCanvas.width)
+    const sy = clamp(desiredY, 0, sourceCanvas.height)
+    const ex = clamp(desiredX + sourceSize, 0, sourceCanvas.width)
+    const ey = clamp(desiredY + sourceSize, 0, sourceCanvas.height)
+    const sw = Math.max(0, ex - sx)
+    const sh = Math.max(0, ey - sy)
 
     const lensCtx = lensCanvas.getContext('2d')
     if (!lensCtx) return
     lensCtx.imageSmoothingEnabled = false
     lensCtx.clearRect(0, 0, lensSize, lensSize)
-    lensCtx.drawImage(sourceCanvas, sx, sy, sourceSize, sourceSize, 0, 0, lensSize, lensSize)
+    if (sw > 0 && sh > 0) {
+      const scale = lensSize / sourceSize
+      const dx = Math.round((sx - desiredX) * scale)
+      const dy = Math.round((sy - desiredY) * scale)
+      const dw = Math.round(sw * scale)
+      const dh = Math.round(sh * scale)
+      lensCtx.drawImage(sourceCanvas, sx, sy, sw, sh, dx, dy, dw, dh)
+    }
 
     lensCtx.strokeStyle = 'rgba(15, 23, 42, 0.4)'
     lensCtx.lineWidth = 1
